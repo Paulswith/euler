@@ -18,7 +18,7 @@ pub(super) mod problem_1 {
         let multiple_5 = 5;
         let sum = sum_multiple(multiple_3, range_max) + sum_multiple(multiple_5, range_max);
         assert_eq!(sum, test(multiple_3, multiple_5, range_max));
-        println!("sum of all the multiples of 3 or 5 below 1000, result is {}", sum);
+        println!("[problem 1]: sum of all the multiples of 3 or 5 below 1000, result is {}", sum);
     }
 
     #[warn(dead_code)]
@@ -58,13 +58,13 @@ By considering the terms in the Fibonacci sequence whose values do not exceed fo
     */
     pub fn entry() {
         let fibonacci_sequence_within_four_million= generate_fibonacci_sequence();
-        println!("problem 2, data source: {:?}", fibonacci_sequence_within_four_million);
+        println!("[problem 2]: data source: {:?}", fibonacci_sequence_within_four_million);
         let mut sum = 0;
         fibonacci_sequence_within_four_million.iter().for_each(|fibonacci| {
             if fibonacci % 2 == 0 { sum += fibonacci.clone(); }
         });
         assert_eq!(sum_even_number_of_fibonacci_sequence(&fibonacci_sequence_within_four_million), sum);
-        println!("Sum even-value of fibonacci sequence within four million is {}", sum);
+        println!("[problem 2]: Sum even-value of fibonacci sequence within four million is {}", sum);
     }
 
     #[warn(dead_code)]
@@ -95,5 +95,106 @@ By considering the terms in the Fibonacci sequence whose values do not exceed fo
             container.push(append_item);
         }
         container
+    }
+}
+
+
+pub(super) mod problem_3 {
+    /*
+    Problem 3
+Largest prime factor
+The prime factors of 13195 are 5, 7, 13 and 29.
+
+What is the largest prime factor of the number 600851475143 ?
+// 解:
+  设该数为X
+  1. X除以最小的质数(质数从小到大)
+  2. X若能被整除, 余数作为新的X', 若不能, 则继续寻找除以下一个质数
+  3. 循环1-2, 直到完全被除到为1
+  4. 全部的可被整除的质数, 求max
+*/
+    use std::cmp::max;
+
+
+    pub fn entry() {
+        let mut prime_factors: Vec<u64> = vec![];
+        let input_num: u64 = 13195;
+        let res = find_largest_prime(input_num);
+        println!("[problem 3]: The input_num {} largest_prime is {}", input_num, res);
+
+        let input_num: u64 = 600851475143;
+        let res = find_largest_prime(input_num);
+        println!("[problem 3]: The input_num {} largest_prime is {}", input_num, res);
+    }
+
+
+    fn find_largest_prime(number: u64) -> u64 {
+        // filter invalid:
+        if number == 1 || number == 0 {
+            return number;
+        }
+        let mut remaining = number;
+        let mut aliquot_primes = vec![];
+        let mut cur_prime = 0;
+        loop {
+            let prime = next_prime(cur_prime);
+            if remaining % prime == 0 {
+                aliquot_primes.push(prime);
+                remaining = remaining / prime;
+//                cur_prime = 0; // 回滚到最小的质数, 目前没发现这种数据.
+            } else {
+                cur_prime = prime;
+            }
+            if remaining == 1 { break; }
+        }
+        println!("[problem 3]: {} has primes: {:?}", number, aliquot_primes);
+        aliquot_primes.into_iter().max().unwrap()
+    }
+
+    // 获取当前数字的下一个质数
+    fn next_prime(cur_prime: u64) -> u64 {
+        if cur_prime < 2 { return 2; }
+        let mut check_prime = cur_prime;
+        loop {
+            check_prime += 1;
+            // assume this prime can not be aliquot
+            let mut can_be_aliquot = false;
+            for num in 2..check_prime {
+                if check_prime % num == 0 {
+                    can_be_aliquot = true;
+                    break;
+                }
+            }
+            if !can_be_aliquot {
+                break;
+            }
+        }
+        check_prime
+    }
+
+
+    ///DEPRECATED(这种获取方法太没必要):
+    /// 获取该区间的全部质数
+    fn primes(in_range: u64) -> Vec<u64> {
+        let mut stack: Vec<u64> = vec![];
+        let mut check_prime = in_range;
+        // 选定质数 > 1 区间:
+        while check_prime > 1 {
+            let mut can_be_aliquot = false;
+            // 质数: 除1和自身可以整除的数
+            for num in 2..check_prime {
+                if check_prime % num == 0 {
+//                    println!("The check_prime={} can be {} aliquot", check_prime, num);
+                    can_be_aliquot = true;
+                    break;
+                }
+            }
+            // if can not be aliquot, regard as prime
+            if !can_be_aliquot { stack.push(check_prime); }
+            check_prime -= 1;
+        }
+        // 反转为从小到大的质数数组
+        stack.reverse();
+        stack
     }
 }
