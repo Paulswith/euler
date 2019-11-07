@@ -198,3 +198,66 @@ What is the largest prime factor of the number 600851475143 ?
         stack
     }
 }
+
+
+pub(super) mod problem_4 {
+    /*
+    Largest palindrome product
+A palindromic number reads the same both ways. The largest palindrome made from the product of two 2-digit numbers is 9009 = 91 × 99.
+
+Find the largest palindrome made from the product of two 3-digit numbers.
+
+//解:
+    1. 将对于的两组数字, 分a列和b列.
+    2. a列loops下移, b每次划分一个区间, 让a * [b_up, b_down] 这个区间的元素, 判断是否回文
+    3. 当b_down和a对齐时, 动态变更[b_up, b_down]
+
+    * b_up - b_down的这个gap, 例如设置为10, 那么999 * [999, 989]这样子开始.
+    * 判断回文的方法: 反转字符串进行字符串判断.
+    */
+    pub fn entry() {
+        let in_range = 99;
+        if let Some((a, b)) = find_largest_palindrome(in_range) {
+            println!("[Problem 4]: in range {}, has palindrome {} made from {}x{}", in_range, a * b, a, b);
+        } else {
+            eprintln!("[Problem 4]: in range {} not found palindrome", in_range);
+        }
+
+        let in_range = 999;
+        if let Some((a, b)) = find_largest_palindrome(in_range) {
+            println!("[Problem 4]: in range {}, has palindrome {} made from {}x{}", in_range, a * b, a, b);
+        } else {
+            eprintln!("[Problem 4]: in range {} not found palindrome", in_range);
+        }
+    }
+
+    fn find_largest_palindrome(in_range: u64) -> Option<(u64, u64)> {
+        let gap = 10;
+        let (mut a_range, mut b_range_up,mut b_range_down) =
+            (in_range, in_range, in_range - gap);
+        while b_range_down > 0 {
+            for num in b_range_down..b_range_up {
+                if is_palindrome_number(a_range * num) {
+                    return Some((a_range, num));
+                }
+            }
+            // a列下移
+            a_range -= 1;// 89
+            // 当b列区间下限对齐a列时, 下移b列区间
+            if b_range_down == a_range {
+                b_range_up = a_range;
+                b_range_down = b_range_up - gap;
+            }
+        }
+        None
+    }
+
+    /// 比较反转前后的字符串是否一致, 来判断回文
+    fn is_palindrome_number(number: u64) -> bool {
+        let ref org_str = number.to_string();
+        let mut to_vec: Vec<char> = org_str.chars().collect();
+        to_vec.reverse();
+        let ref reversed_str = to_vec.iter().collect::<String>();
+        reversed_str == org_str
+    }
+}

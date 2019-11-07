@@ -9,4 +9,5 @@ pub fn entry() {
     archives_1_5::problem_1::entry();
     archives_1_5::problem_2::entry();
     archives_1_5::problem_3::entry();
+    archives_1_5::problem_4::entry();
 }
